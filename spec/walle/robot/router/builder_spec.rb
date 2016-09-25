@@ -38,18 +38,26 @@ RSpec.describe Walle::Robot::Router::Builder do
 
   describe '#command' do
     it 'constructs regexp and calls match method' do
-      expect(subject).to receive(:match).with(/.*(command1|command2)/, controller: 'Controller')
+      expect(subject).to receive(:match).with(/(?<command>command1|command2)/, controller: 'Controller')
       subject.command('command1', 'command2', controller: 'Controller')
     end
 
-    it 'constructs regexp using format and calls match method' do
+    it 'constructs regexp and calls match method' do
       expect(subject).to receive(:match).with(
-        /lalala (command1|command2) lalala/,
-        controller: 'Controller',
-        format: 'lalala %{command} lalala'
+        /(?<command>command1|command2)\s+(?<arg1>[A-Z]{2})\s+(?<arg2>[A-Z]{2})/,
+        controller: 'Controller'
       )
 
-      subject.command('command1', 'command2', controller: 'Controller', format: 'lalala %{command} lalala')
+      subject.command('command1', 'command2', arg1: /[A-Z]{2}/, arg2: /[A-Z]{2}/, controller: 'Controller')
+    end
+
+    it 'constructs regexp and calls match method' do
+      expect(subject).to receive(:match).with(
+        /(?<command>command1|command2)\s(?<arg1>[A-Z]{2})\stext/,
+        controller: 'Controller', :delimiter=>/\s/
+      )
+
+      subject.command('command1', 'command2', arg1: /[A-Z]{2}/, arg2: 'text', delimiter: /\s/, controller: 'Controller')
     end
   end
 

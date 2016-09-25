@@ -24,7 +24,6 @@ $ gem install walle
 
 ## Usage
 
-
 Example bot class:
 
 ```ruby
@@ -51,6 +50,9 @@ class Robot < Walle::Robot
     # Use middleware ONLY for routes
     use SomeCustomMidleware, 'arg1', 'arg2'
 
+    # Equals to match(/(?<command>convert|c)\s+(?<amount>\d+)\s*(?<from>[A-Z]{3})\s+into\s+(?<to>[A-Z]{3})/, controller: CurrencyConvertor)
+    command 'convert', 'c', amount: /\d+/, from: /[A-Z]{3}/, into: 'into', to: /[A-Z]{3}/, delimiter: /\s+/, controller: CurrencyConvertor
+
     # Prefix all matches with bot name, eg. <@U2EU6KZDW>
     direct do
       # Matches string like "<@U2EU6KZDW> convert 10000 RUB into EUR"
@@ -58,6 +60,13 @@ class Robot < Walle::Robot
         # env.event   - :message
         # env.client  - Slack::RealTime::Client
         # env.data    - Event data (it can contain extra data that can be added in middlewares)
+        #   - type: "message"
+        #   - channel: "V2T4X87M5"
+        #   - user: "Z005UR62C"
+        #   - text: "<@U2EU6KZDW> convert 10000 RUB into EUR"
+        #   - ts: "1474580776.000003"
+        #   - team: "T020WVADD"
+        #   - ...
         # env.matches - MatchData object with captured values:
         #   - amount: 10000
         #   - from: RUB
@@ -74,7 +83,17 @@ class Robot < Walle::Robot
 end
 ```
 
-Run bot: `Robot.run`, `Robot.run(async: true)`.
+Configure Slack client:
+
+```ruby
+Slack.configure do |c|
+  c.token = 'xxxx-9295867...'
+  c.logger = Logger.new(STDOUT)
+  c.logger.level = Logger::INFO
+end
+```
+
+And run the bot: `Robot.run`, `Robot.run(async: true)`.
 
 Also you can manually create the bot and give to him a prepared client:
 
@@ -83,6 +102,31 @@ client = Slack::RealTime::Client.new(options)
 robot  = Robot.new(client, async: true)
 robot.run
 ```
+
+### Routes
+
+There are three methods for creating routes: `match`, `command` and `default`:
+
+- `match(regexp, options, &block)` - Add route based on regular expression.
+  - `regexp` - Regular expression.
+  - `options` - Options that adjust route behavior.
+    - `prefix` - Add prefix for regular expression, default: `/.*/`. If you want to delete prefix you should use `prefix: false`. `prefix: nil` resets prefix to default value.
+    - `direct` -  Uses to create direct route. This’s route that directly address to bot. Messages without `<@botname>` at the start of command will be rejected.
+    - `controller` - Any class or object that has `call` method. It can be instance or class method.
+  - `block` - It will be used as controller when block is defined.
+
+
+- `command(*commands, options, block)` - TODO...
+
+- `default(options, block)` - Create default route. It will be used if no one route was matched.
+
+### Controllers
+
+TODO:
+
+### Inheritance
+
+TODO:
 
 ## Contributing
 

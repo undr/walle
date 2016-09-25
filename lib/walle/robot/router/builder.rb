@@ -2,6 +2,8 @@ module Walle
   class Robot
     class Router
       class Builder
+        ROUTE_OPTIONS = %i{controller prefix direct delimiter}
+
         instance_methods.each do |method|
           undef_method(method) if method !~ /^(__|instance_eval|class|object_id|with_options|singleton_class|inspect)/
         end
@@ -20,10 +22,14 @@ module Walle
         end
 
         def command(*commands, &block)
-          options = commands.extract_options!
-          format  = options.fetch(:format, '.*%{command}')
-          regexp  = Regexp.new(format % { command: "(#{commands.join(?|)})" })
-          match(regexp, options, &block)
+          arguments = commands.extract_options!
+          options   = arguments.extract!(*ROUTE_OPTIONS)
+
+          regexp = { command: /#{commands.join(?|)}/ }.merge(arguments).map do |name, regexp|
+            regexp.is_a?(Regexp) ? "(?<#{name}>#{regexp.source})" : "#{regexp}"
+          end.join(options[:delimiter].try(:source) || '\s+')
+
+          match(Regexp.new(regexp), options, &block)
         end
 
         def direct(&block)
@@ -36,12 +42,12 @@ module Walle
 
         def match(regexp, options = {}, &block)
           controller = extract_controller(options, &block)
-          router.routes << Route.new(options.merge(controller: controller, regexp: regexp))
+          router.routes << Route.new(options.slice(*ROUTE_OPTIONS).merge(controller: controller, regexp: regexp))
         end
 
         def default(options = {}, &block)
           controller = extract_controller(options, &block)
-          router.default = Route.new(options.merge(controller: controller))
+          router.default = Route.new(options.slice(*ROUTE_OPTIONS).merge(controller: controller))
         end
 
         def build(block)
