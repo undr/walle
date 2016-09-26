@@ -1,5 +1,7 @@
 # Walle
 
+[![Build Status](https://travis-ci.org/undr/walle.svg?branch=master)](https://travis-ci.org/undr/walle)
+
 Simple DSL for building Slack bots.
 
 ## Installation
