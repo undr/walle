@@ -118,7 +118,38 @@ There are three methods for creating routes: `match`, `command` and `default`:
   - `block` - It will be used as controller when block is defined.
 
 
-- `command(*commands, options, block)` - TODO...
+- `command(*commands, options, block)` - Construct a regular expression using command names and add route using `match`. Check examples.
+
+  ```ruby
+  # Equals to: match(/(?<command>convert|c)\s+(?<amount>\d+)\s*(?<from>[A-Z]{3})\s+into\s+(?<to>[A-Z]{3})/, controller: CurrencyConvertor)
+  command 'convert', 'c', amount: /\d+/, from: /[A-Z]{3}/, into: 'into', to: /[A-Z]{3}/, delimiter: /\s+/ do |env|
+    # "convert 10000 RUB into EUR"
+    # `env.matches` is:
+    #  - command: "convert"
+    #  - amount: 10000
+    #  - from: "RUB"
+    #  - to: "EUR"
+  end
+  ```
+
+  Example:
+
+  ```ruby
+  command 'add', 'subtract', 'multiply', 'divide', first: /\d+/, second: /\d+/ do |env|
+    result = case env.matches[:command]
+    when 'add'
+      env.matches[:first].to_i + env.matches[:second].to_i
+    when 'subtract'
+      env.matches[:first].to_i - env.matches[:second].to_i
+    when 'multiply'
+      env.matches[:first].to_i * env.matches[:second].to_i
+    when 'divide'
+      env.matches[:first].to_i / env.matches[:second].to_i
+    end
+
+    env.client.message(channel: env.data.channel, text: result.to_s)
+  end
+  ```
 
 - `default(options, block)` - Create default route. It will be used if no one route was matched.
 
@@ -128,7 +159,7 @@ TODO:
 
 ### Inheritance
 
-TODO:
+All routes and event handlers from parent class and subclass will be merged when we inherit one bot from another one.
 
 ## Contributing
 

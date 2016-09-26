@@ -1,6 +1,8 @@
 module Walle
-  module Middleware
+  module Middlewares
     class Logger
+      attr_reader :env, :logger, :options
+
       def initialize(env, logger, options = {})
         @env = env
         @logger = logger
@@ -8,7 +10,7 @@ module Walle
       end
 
       def before
-        logger.log("[#{event}] - #{data.inspect}")
+        logger.info("[#{env.event}] - #{env.data.to_json}")
       end
     end
   end

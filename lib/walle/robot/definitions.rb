@@ -49,7 +49,7 @@ module Walle
         all_handlers.each do |event, event_handlers|
           event_handlers.each do |handler|
             client.on(event) do |data|
-              handle_event(environment(event, client, data))
+              handle_event(environment(event, client, data), handler)
             end
           end
         end
@@ -66,7 +66,7 @@ module Walle
         Environment.new(event, client, data)
       end
 
-      def handle_event(env)
+      def handle_event(env, handler)
         run_middlewares(env) do |env|
           handler.call(env)
         end

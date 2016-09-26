@@ -18,7 +18,7 @@ module Walle
         end
 
         def use(middleware, *args)
-          router.middlewares.use(middleware, *args)
+          router.use(middleware, *args)
         end
 
         def command(*commands, &block)
