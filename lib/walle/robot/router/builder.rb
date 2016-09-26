@@ -47,7 +47,7 @@ module Walle
 
         def default(options = {}, &block)
           controller = extract_controller(options, &block)
-          router.default = Route.new(options.slice(*ROUTE_OPTIONS).merge(controller: controller))
+          router.default[!!options[:direct]] = Route.new(options.slice(*ROUTE_OPTIONS).merge(controller: controller))
         end
 
         def build(block)

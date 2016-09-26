@@ -7,13 +7,13 @@ module Walle
       include ::Walle::Middlewares::Helper
 
       DEFAULT_CONTROLLER = -> (*_) {}
+      DEFAULT_ROUTER = Route.new(regexp: /.*/, controller: DEFAULT_CONTROLLER)
 
-      attr_reader :routes, :middlewares
-      attr_accessor :default
+      attr_reader :routes, :middlewares, :default
 
       def initialize(&block)
         @routes = []
-        @default = Route.new(regexp: /.*/, controller: DEFAULT_CONTROLLER)
+        @default = { true => DEFAULT_ROUTER, false => DEFAULT_ROUTER }
         run_builder!(block)
       end
 
@@ -25,8 +25,12 @@ module Walle
 
       private
 
+      def all_routes
+        routes + default.values.uniq
+      end
+
       def lookup_route(env)
-        routes.find { |route| route.match?(env) } || default
+        all_routes.find { |route| route.match?(env) } || DEFAULT_ROUTER
       end
 
       def run_builder!(block)
