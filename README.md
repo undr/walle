@@ -31,7 +31,7 @@ Example bot class:
 ```ruby
 class Robot < Walle::Robot
   # Use middleware for all events
-  use Walle::Middlewares::Logger, Logger.new(STDOUT)
+  use Walle::Middlewares::Logger, Slack.config.logger
 
   # catch `hello` events
   hello { |env| }
@@ -121,7 +121,7 @@ There are three methods for creating routes: `match`, `command` and `default`:
 - `command(*commands, options, block)` - Construct a regular expression using command names and add route using `match`. Check examples.
 
   ```ruby
-  # Equals to: match(/(?<command>convert|c)\s+(?<amount>\d+)\s*(?<from>[A-Z]{3})\s+into\s+(?<to>[A-Z]{3})/, controller: CurrencyConvertor)
+  # Equals to: match(/(?<command>convert|c)\s+(?<amount>\d+)\s*(?<from>[A-Z]{3})\s+into\s+(?<to>[A-Z]{3})/) { |env| }
   command 'convert', 'c', amount: /\d+/, from: /[A-Z]{3}/, into: 'into', to: /[A-Z]{3}/, delimiter: /\s+/ do |env|
     # "convert 10000 RUB into EUR"
     # `env.matches` is:
