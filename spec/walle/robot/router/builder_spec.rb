@@ -26,12 +26,11 @@ RSpec.describe Walle::Robot::Router::Builder do
   end
 
   describe '#use' do
-    let(:middlewares) { double(:middlewares) }
-    let(:router) { double(:router, middlewares: middlewares) }
+    let(:router) { double(:router) }
     let(:args) { ['Middleware', 'arg1', 'arg2'] }
 
     it 'delegates to middleware builder of router' do
-      expect(middlewares).to receive(:use).with(*args)
+      expect(router).to receive(:use).with(*args)
       subject.use(*args)
     end
   end
